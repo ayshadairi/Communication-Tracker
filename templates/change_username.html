@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass p-8 rounded-lg max-w-md mx-auto">
+    <h1 class="text-3xl neon mb-6 text-center">Change Username</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-3 {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white rounded">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="{{ url_for('change_username') }}">
+        <div class="mb-4">
+            <label class="block mb-2">New Username</label>
+            <input type="text" name="new_username" class="w-full p-2 rounded bg-gray-700" required
+                   pattern="[A-Za-z0-9]{3,20}" title="3-20 alphanumeric characters">
+        </div>
+        
+        <div class="mb-6">
+            <label class="block mb-2">Current Password</label>
+            <input type="password" name="password" class="w-full p-2 rounded bg-gray-700" required>
+        </div>
+        
+        <button type="submit" class="btn-glow w-full py-2">Update Username</button>
+    </form>
+    
+    <a href="{{ url_for('profile') }}" class="block text-center mt-4 text-blue-400 hover:underline">Back to Profile</a>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass p-8 rounded-lg max-w-md mx-auto">
+    <h1 class="text-3xl neon mb-6 text-center">Your Profile</h1>
+    
+    <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+        <p class="text-lg"><span class="font-bold">Username:</span> {{ user['username'] }}</p>
+        <p class="text-lg mt-2"><span class="font-bold">Email:</span> {{ user['email'] or 'Not set' }}</p>
+    </div>
+    
+    <div class="space-y-4">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_users') }}" class="btn btn-admin">
+            ⚙️ User Approvals
+        </a>
+        {% endif %}
+        <a href="{{ url_for('change_username') }}" class="btn-glow block text-center py-2">Change Username</a>
+        <a href="{{ url_for('change_password') }}" class="btn-glow block text-center py-2">Change Password</a>
+        <a href="{{ url_for('logout') }}" class="btn-glow block text-center py-2 bg-red-600">Logout</a>
+    </div>
+</div>
+{% endblock %}

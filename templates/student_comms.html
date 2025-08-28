@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <h2>All Communications for: {{ student_name }}</h2>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Staff Member</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log['date'] }}</td>
+                <td>{{ log['interaction_type'] }}</td>
+                <td>{{ log['username'] }}</td>
+                <td>{{ log['notes'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Back to All Logs</a>
+</div>
+{% endblock %}

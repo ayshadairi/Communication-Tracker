@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass p-8 rounded-lg max-w-md mx-auto">
+    <h1 class="text-3xl neon mb-6 text-center">Login</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="mb-4 p-3 bg-blue-500 text-white rounded text-center">
+                {{ messages[0] }}
+                {% if 'too many' in messages[0] %}
+                    <p class="text-sm mt-1">Try again in a few minutes</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/login" class="space-y-4">
+        <div>
+            <label class="block mb-1">Username</label>
+            <input type="text" name="username" class="w-full p-2 rounded bg-gray-700" required>
+        </div>
+        <div>
+            <label class="block mb-1">Password</label>
+            <input type="password" name="password" class="w-full p-2 rounded bg-gray-700" required>
+        </div>
+        <button type="submit" class="w-full btn-glow py-2">Login</button>
+        <p class="text-center mt-4">
+        <a href="{{ url_for('forgot_password') }}" class="text-blue-400 hover:underline">Forgot Password?</a>
+        </p>
+    </form>
+
+    <p class="text-center mt-4">
+        Don't have an account? <a href="/register" class="text-blue-400 hover:underline">Register here</a>
+    </p>
+</div>
+{% endblock %}

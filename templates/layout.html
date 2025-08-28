@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Communication Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .btn-admin {
+        background-color: #4a148c;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        }
+        .btn-admin:hover {
+            background-color: #7b1fa2;
+        }
+        .table {
+        width: 100%;
+        margin-top: 20px;
+        }
+        .text-success { color: green; }
+        .text-warning { color: orange; }
+        .badge { margin-left: 5px; }
+        .btn-sm { margin-right: 5px; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .neon { color: #38bdf8; }
+        .btn-glow {
+            background-color: #2563eb;
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            transition: 0.3s;
+        }
+        .btn-glow:hover { background-color: #1d4ed8; transform: scale(1.05); }
+
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl neon font-bold mb-6 text-center">Communication Tracker</h1>
+
+        {% if current_user.is_authenticated %}
+            <nav class="mb-6 text-center">
+                <a href="/" class="btn-glow px-4 py-2 mr-4">View Logs</a>
+                <a href="/add" class="btn-glow px-4 py-2 mr-4">Add Log</a>
+                <a href="/profile" class="btn-glow px-4 py-2 mr-4">Profile</a>
+                <a href="/logout" class="btn-glow px-4 py-2 bg-red-600">Logout</a>
+            </nav>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

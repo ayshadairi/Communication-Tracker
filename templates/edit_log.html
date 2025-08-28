@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Log</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+        h1 {
+            background-color: #111;
+            color: #3498db;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+            font-size: 3em;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 600;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+        }
+        label {
+            font-size: 1.2em;
+            color: #f2f2f2;
+            display: block;
+            margin-bottom: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0 20px 0;
+            background-color: #333;
+            color: #f2f2f2;
+            border: 1px solid #444;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+        select:focus, input:focus, textarea:focus {
+            background-color: #444;
+            outline: none;
+            border: 1px solid #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #f2f2f2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #3498db;
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .char-counter {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 15px;
+        }
+        .flash-message {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #2c3e50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Log</h1>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message" style="color: {% if category == 'error' %}#e74c3c{% else %}#2ecc71{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('edit_log', log_id=log.id) }}" onsubmit="return validateForm()">
+            <label for="person_type">Person Type:</label>
+            <select id="person_type" name="person_type" required>
+                <option value="Employer" {% if log.person_type == 'Employer' %}selected{% endif %}>Employer</option>
+                <option value="Student" {% if log.person_type == 'Student' %}selected{% endif %}>Student</option>
+            </select>
+
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ log.name }}"
+                   pattern="[A-Za-z\s]{2,50}"
+                   title="2-50 alphabetic characters"
+                   required>
+            <div id="name-error" class="error-message">Name must be 2-50 letters</div>
+
+            <label for="interaction_type">Interaction Type:</label>
+            <select id="interaction_type" name="interaction_type" required>
+                <option value="Phone Call" {% if log.interaction_type == 'Phone Call' %}selected{% endif %}>Phone Call</option>
+                <option value="Email" {% if log.interaction_type == 'Email' %}selected{% endif %}>Email</option>
+                <option value="In-Person" {% if log.interaction_type == 'In-Person' %}selected{% endif %}>In-Person</option>
+                <option value="Meeting" {% if log.interaction_type == 'Meeting' %}selected{% endif %}>Meeting</option>
+            </select>
+
+            <label for="issue_type">Issue Type:</label>
+            <select id="issue_type" name="issue_type" required>
+                <option value="Just Checking" {% if log.issue_type == 'Just Checking' %}selected{% endif %}>Just Checking</option>
+                <option value="Problem" {% if log.issue_type == 'Problem' %}selected{% endif %}>Problem</option>
+                <option value="Complaint" {% if log.issue_type == 'Complaint' %}selected{% endif %}>Complaint</option>
+                <option value="Request" {% if log.issue_type == 'Request' %}selected{% endif %}>Request</option>
+                <option value="Feedback" {% if log.issue_type == 'Feedback' %}selected{% endif %}>Feedback</option>
+                <option value="Inquiry" {% if log.issue_type == 'Inquiry' %}selected{% endif %}>Inquiry</option>
+                <option value="Technical Issue" {% if log.issue_type == 'Technical Issue' %}selected{% endif %}>Technical Issue</option>
+                <option value="Billing/Payment" {% if log.issue_type == 'Billing/Payment' %}selected{% endif %}>Billing/Payment</option>
+                <option value="Follow-Up" {% if log.issue_type == 'Follow-Up' %}selected{% endif %}>Follow-Up</option>
+                <option value="Urgent" {% if log.issue_type == 'Urgent' %}selected{% endif %}>Urgent</option>
+                <option value="Other" {% if log.issue_type == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+
+            <label for="notes">Notes:</label>
+            <textarea id="notes" name="notes" maxlength="500" required oninput="updateCharCount()">{{ log.notes }}</textarea>
+            <div class="char-counter"><span id="char-count">{{ 500 - log.notes|length }}</span> characters remaining</div>
+
+            <button type="submit">Update Log</button>
+        </form>
+        <a href="{{ url_for('index') }}">Back to Logs</a>
+    </div>
+
+    <script>
+        // Character counter for notes
+        function updateCharCount() {
+            const textarea = document.getElementById('notes');
+            const counter = document.getElementById('char-count');
+            const remaining = 500 - textarea.value.length;
+            counter.textContent = remaining;
+            counter.style.color = remaining < 50 ? '#e74c3c' : '#7f8c8d';
+        }
+
+        // Initialize character count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharCount();
+
+            // Validate name on blur
+            document.getElementById('name').addEventListener('blur', function() {
+                const nameInput = this;
+                const nameError = document.getElementById('name-error');
+                if (!/^[A-Za-z\s]{2,50}$/.test(nameInput.value)) {
+                    nameError.style.display = 'block';
+                } else {
+                    nameError.style.display = 'none';
+                }
+            });
+        });
+
+        // Form validation
+        function validateForm() {
+            const nameInput = document.getElementById('name');
+            const nameError = document.getElementById('name-error');
+
+            if (!/^[A-Za-z\s]{2,50}$/.test(nameInput.value)) {
+                nameError.style.display = 'block';
+                nameInput.focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

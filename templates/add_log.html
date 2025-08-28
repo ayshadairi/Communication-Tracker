@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <h1 class="text-3xl neon mb-6">Add New Log</h1>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="mb-4 p-3 bg-red-500 text-white rounded">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="/add">
+        <div class="mb-4">
+            <label for="person_type" class="block mb-2">Person Type:</label>
+            <select id="person_type" name="person_type" class="w-full p-2 rounded bg-gray-700" required>
+                <option value="Employer">Employer</option>
+                <option value="Student">Student</option>
+            </select>
+        </div>
+        
+        <div class="mb-4">
+            <label for="name" class="block mb-2">Name:</label>
+            <input type="text" id="name" name="name" 
+                   class="w-full p-2 rounded bg-gray-700"
+                   pattern="[A-Za-z\s]{2,50}"
+                   title="2-50 alphabetic characters"
+                   required>
+        </div>
+        
+        <div class="mb-4">
+            <label for="interaction_type" class="block mb-2">Interaction Type:</label>
+            <select id="interaction_type" name="interaction_type" class="w-full p-2 rounded bg-gray-700" required>
+                <option value="Phone Call">Phone Call</option>
+                <option value="Email">Email</option>
+                <option value="In-Person">In-Person</option>
+                <option value="Meeting">Meeting</option>
+            </select>
+        </div>
+        
+        <div class="mb-4">
+            <label for="issue_type" class="block mb-2">Issue Type:</label>
+            <select id="issue_type" name="issue_type" class="w-full p-2 rounded bg-gray-700" required>
+                <option value="Just Checking">Just Checking</option>
+                <option value="Problem">Problem</option>
+                <option value="Complaint">Complaint</option>
+                <option value="Request">Request</option>
+                <option value="Feedback">Feedback</option>
+                <option value="Inquiry">Inquiry</option>
+                <option value="Technical Issue">Technical Issue</option>
+                <option value="Billing/Payment">Billing/Payment</option>
+                <option value="Follow-Up">Follow-Up</option>
+                <option value="Urgent">Urgent</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        
+        <div class="mb-4">
+            <label for="notes" class="block mb-2">Notes:</label>
+            <textarea id="notes" name="notes" 
+                      class="w-full p-2 rounded bg-gray-700"
+                      maxlength="500"
+                      required></textarea>
+            <p class="text-sm text-gray-400">Max 500 characters</p>
+        </div>
+        
+        <button type="submit" class="btn-glow w-full py-2">Add Log</button>
+    </form>
+    
+    <a href="/" class="block text-center mt-6 text-blue-400 hover:underline">Back to Logs</a>
+</div>
+{% endblock %}

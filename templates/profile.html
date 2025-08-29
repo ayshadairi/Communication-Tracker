@@ -6,12 +6,13 @@
     <div class="mb-6 p-4 bg-gray-800 rounded-lg">
         <p class="text-lg"><span class="font-bold">Username:</span> {{ user['username'] }}</p>
         <p class="text-lg mt-2"><span class="font-bold">Email:</span> {{ user['email'] or 'Not set' }}</p>
+        <p class="text-lg mt-2"><span class="font-bold">Member since:</span> {{ user['created_at'] }}</p>
     </div>
-    
+
     <div class="space-y-4">
-        {% if current_user.is_admin %}
-        <a href="{{ url_for('admin_users') }}" class="btn btn-admin">
-            ⚙️ User Approvals
+        {% if user['is_admin'] %}
+        <a href="#" class="btn-admin block text-center py-2">
+            ⚙️ Admin Panel (Coming Soon)
         </a>
         {% endif %}
         <a href="{{ url_for('change_username') }}" class="btn-glow block text-center py-2">Change Username</a>

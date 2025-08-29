@@ -5,167 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Log</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #121212;
             color: #e0e0e0;
             margin: 0;
-            padding: 0;
-            transition: all 0.3s ease;
+            padding: 20px;
         }
-        h1 {
-            background-color: #111;
-            color: #3498db;
-            text-align: center;
-            padding: 40px;
-            margin: 0;
-            font-size: 3em;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: 600;
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
-        .container {
-            width: 50%;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: #1a1a1a;
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+        .neon {
+            color: #38bdf8;
         }
-        label {
-            font-size: 1.2em;
-            color: #f2f2f2;
-            display: block;
-            margin-bottom: 10px;
+        .btn-glow {
+            background-color: #2563eb;
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            transition: 0.3s;
         }
-        input, textarea, select {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0 20px 0;
-            background-color: #333;
-            color: #f2f2f2;
-            border: 1px solid #444;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-size: 1em;
-        }
-        select:focus, input:focus, textarea:focus {
-            background-color: #444;
-            outline: none;
-            border: 1px solid #3498db;
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #f2f2f2;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        a:hover {
-            color: #3498db;
-            text-decoration: underline;
-        }
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.9em;
-            margin-top: -15px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .char-counter {
-            font-size: 0.8em;
-            color: #7f8c8d;
-            text-align: right;
-            margin-top: -15px;
-            margin-bottom: 15px;
-        }
-        .flash-message {
-            color: #e74c3c;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #2c3e50;
-            border-radius: 5px;
+        .btn-glow:hover {
+            background-color: #1d4ed8;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
-    <h1>Edit Log</h1>
-    <div class="container">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl neon font-bold mb-8 text-center">Edit Communication Log</h1>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="flash-message" style="color: {% if category == 'error' %}#e74c3c{% else %}#2ecc71{% endif %}">
+                    <div class="mb-6 p-4 {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white rounded-lg">
                         {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('edit_log', log_id=log.id) }}" onsubmit="return validateForm()">
-            <label for="person_type">Person Type:</label>
-            <select id="person_type" name="person_type" required>
-                <option value="Employer" {% if log.person_type == 'Employer' %}selected{% endif %}>Employer</option>
-                <option value="Student" {% if log.person_type == 'Student' %}selected{% endif %}>Student</option>
-            </select>
+        <div class="glass p-8 rounded-lg">
+            <form method="POST" action="{{ url_for('edit_log', log_id=log.id) }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="person_type" class="block mb-2 text-lg">Category *</label>
+                            <select id="person_type" name="person_type" class="w-full p-3 rounded bg-gray-700" required>
+                                <option value="Client" {% if log.person_type == 'Client' %}selected{% endif %}>Client</option>
+                                <option value="Colleague" {% if log.person_type == 'Colleague' %}selected{% endif %}>Colleague</option>
+                                <option value="Supplier" {% if log.person_type == 'Supplier' %}selected{% endif %}>Supplier</option>
+                                <option value="Partner" {% if log.person_type == 'Partner' %}selected{% endif %}>Partner</option>
+                                <option value="Team Member" {% if log.person_type == 'Team Member' %}selected{% endif %}>Team Member</option>
+                                <option value="Manager" {% if log.person_type == 'Manager' %}selected{% endif %}>Manager</option>
+                                <option value="Customer" {% if log.person_type == 'Customer' %}selected{% endif %}>Customer</option>
+                                <option value="Vendor" {% if log.person_type == 'Vendor' %}selected{% endif %}>Vendor</option>
+                                <option value="Other" {% if log.person_type == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
 
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" value="{{ log.name }}"
-                   pattern="[A-Za-z\s]{2,50}"
-                   title="2-50 alphabetic characters"
-                   required>
-            <div id="name-error" class="error-message">Name must be 2-50 letters</div>
+                        <div>
+                            <label for="name" class="block mb-2 text-lg">Contact Name *</label>
+                            <input type="text" id="name" name="name" value="{{ log.name }}"
+                                   class="w-full p-3 rounded bg-gray-700"
+                                   pattern=".{2,50}"
+                                   title="2-50 characters"
+                                   required>
+                        </div>
+                    </div>
 
-            <label for="interaction_type">Interaction Type:</label>
-            <select id="interaction_type" name="interaction_type" required>
-                <option value="Phone Call" {% if log.interaction_type == 'Phone Call' %}selected{% endif %}>Phone Call</option>
-                <option value="Email" {% if log.interaction_type == 'Email' %}selected{% endif %}>Email</option>
-                <option value="In-Person" {% if log.interaction_type == 'In-Person' %}selected{% endif %}>In-Person</option>
-                <option value="Meeting" {% if log.interaction_type == 'Meeting' %}selected{% endif %}>Meeting</option>
-            </select>
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="interaction_type" class="block mb-2 text-lg">Communication Type *</label>
+                            <select id="interaction_type" name="interaction_type" class="w-full p-3 rounded bg-gray-700" required>
+                                <option value="Phone Call" {% if log.interaction_type == 'Phone Call' %}selected{% endif %}>Phone Call</option>
+                                <option value="Email" {% if log.interaction_type == 'Email' %}selected{% endif %}>Email</option>
+                                <option value="Video Meeting" {% if log.interaction_type == 'Video Meeting' %}selected{% endif %}>Video Meeting</option>
+                                <option value="In-Person Meeting" {% if log.interaction_type == 'In-Person Meeting' %}selected{% endif %}>In-Person Meeting</option>
+                                <option value="Text Message" {% if log.interaction_type == 'Text Message' %}selected{% endif %}>Text Message</option>
+                                <option value="Instant Message" {% if log.interaction_type == 'Instant Message' %}selected{% endif %}>Instant Message</option>
+                                <option value="Social Media" {% if log.interaction_type == 'Social Media' %}selected{% endif %}>Social Media</option>
+                                <option value="Other" {% if log.interaction_type == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
 
-            <label for="issue_type">Issue Type:</label>
-            <select id="issue_type" name="issue_type" required>
-                <option value="Just Checking" {% if log.issue_type == 'Just Checking' %}selected{% endif %}>Just Checking</option>
-                <option value="Problem" {% if log.issue_type == 'Problem' %}selected{% endif %}>Problem</option>
-                <option value="Complaint" {% if log.issue_type == 'Complaint' %}selected{% endif %}>Complaint</option>
-                <option value="Request" {% if log.issue_type == 'Request' %}selected{% endif %}>Request</option>
-                <option value="Feedback" {% if log.issue_type == 'Feedback' %}selected{% endif %}>Feedback</option>
-                <option value="Inquiry" {% if log.issue_type == 'Inquiry' %}selected{% endif %}>Inquiry</option>
-                <option value="Technical Issue" {% if log.issue_type == 'Technical Issue' %}selected{% endif %}>Technical Issue</option>
-                <option value="Billing/Payment" {% if log.issue_type == 'Billing/Payment' %}selected{% endif %}>Billing/Payment</option>
-                <option value="Follow-Up" {% if log.issue_type == 'Follow-Up' %}selected{% endif %}>Follow-Up</option>
-                <option value="Urgent" {% if log.issue_type == 'Urgent' %}selected{% endif %}>Urgent</option>
-                <option value="Other" {% if log.issue_type == 'Other' %}selected{% endif %}>Other</option>
-            </select>
+                        <div>
+                            <label for="issue_type" class="block mb-2 text-lg">Purpose *</label>
+                            <select id="issue_type" name="issue_type" class="w-full p-3 rounded bg-gray-700" required>
+                                <option value="Follow-up" {% if log.issue_type == 'Follow-up' %}selected{% endif %}>Follow-up</option>
+                                <option value="Project Update" {% if log.issue_type == 'Project Update' %}selected{% endif %}>Project Update</option>
+                                <option value="Question" {% if log.issue_type == 'Question' %}selected{% endif %}>Question</option>
+                                <option value="Problem Resolution" {% if log.issue_type == 'Problem Resolution' %}selected{% endif %}>Problem Resolution</option>
+                                <option value="Planning" {% if log.issue_type == 'Planning' %}selected{% endif %}>Planning</option>
+                                <option value="Feedback" {% if log.issue_type == 'Feedback' %}selected{% endif %}>Feedback</option>
+                                <option value="Introduction" {% if log.issue_type == 'Introduction' %}selected{% endif %}>Introduction</option>
+                                <option value="Networking" {% if log.issue_type == 'Networking' %}selected{% endif %}>Networking</option>
+                                <option value="Sales" {% if log.issue_type == 'Sales' %}selected{% endif %}>Sales</option>
+                                <option value="Support" {% if log.issue_type == 'Support' %}selected{% endif %}>Support</option>
+                                <option value="Other" {% if log.issue_type == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-            <label for="notes">Notes:</label>
-            <textarea id="notes" name="notes" maxlength="500" required oninput="updateCharCount()">{{ log.notes }}</textarea>
-            <div class="char-counter"><span id="char-count">{{ 500 - log.notes|length }}</span> characters remaining</div>
+                <div class="mb-6">
+                    <label for="notes" class="block mb-2 text-lg">Notes *</label>
+                    <textarea id="notes" name="notes"
+                              class="w-full p-3 rounded bg-gray-700"
+                              rows="5"
+                              maxlength="500"
+                              required>{{ log.notes }}</textarea>
+                    <div class="flex justify-between mt-2">
+                        <p class="text-sm text-gray-400">Max 500 characters</p>
+                        <p class="text-sm text-gray-400"><span id="char-count">{{ 500 - log.notes|length }}</span> characters remaining</p>
+                    </div>
+                </div>
 
-            <button type="submit">Update Log</button>
-        </form>
-        <a href="{{ url_for('index') }}">Back to Logs</a>
+                <div class="flex gap-4">
+                    <button type="submit" class="btn-glow px-8 py-3 text-lg">Update Log</button>
+                    <a href="{{ url_for('index') }}" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -178,34 +144,11 @@
             counter.style.color = remaining < 50 ? '#e74c3c' : '#7f8c8d';
         }
 
-        // Initialize character count on page load
         document.addEventListener('DOMContentLoaded', function() {
-            updateCharCount();
-
-            // Validate name on blur
-            document.getElementById('name').addEventListener('blur', function() {
-                const nameInput = this;
-                const nameError = document.getElementById('name-error');
-                if (!/^[A-Za-z\s]{2,50}$/.test(nameInput.value)) {
-                    nameError.style.display = 'block';
-                } else {
-                    nameError.style.display = 'none';
-                }
-            });
+            const notes = document.getElementById('notes');
+            notes.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial update
         });
-
-        // Form validation
-        function validateForm() {
-            const nameInput = document.getElementById('name');
-            const nameError = document.getElementById('name-error');
-
-            if (!/^[A-Za-z\s]{2,50}$/.test(nameInput.value)) {
-                nameError.style.display = 'block';
-                nameInput.focus();
-                return false;
-            }
-            return true;
-        }
     </script>
 </body>
 </html>

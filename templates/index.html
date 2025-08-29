@@ -3,121 +3,113 @@
 <div class="container">
 
     <!-- Enhanced Filter Section -->
-    <!-- Enhanced Filter Section -->
-<div class="glass p-4 mb-6 rounded-lg" style="background-color: #1a1a1a; padding: 20px; margin-bottom: 30px;">
-    <h3 style="color: #3498db; font-size: 1.5em; margin-bottom: 20px;">Filter Logs</h3>
-    <form method="GET" action="/">
-        <!-- First Row - 3 filters -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Name</label>
-                <input type="text" name="name" value="{{ filters.name }}"
-                       style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+    <div class="glass p-4 mb-6 rounded-lg" style="background-color: #1a1a1a; padding: 20px; margin-bottom: 30px;">
+        <h3 style="color: #3498db; font-size: 1.5em; margin-bottom: 20px;">Filter Logs</h3>
+        <form method="GET" action="/">
+            <!-- First Row - 3 filters -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Name</label>
+                    <input type="text" name="name" value="{{ filters.name }}"
+                           style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;"
+                           placeholder="Search by name">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Category</label>
+                    <select name="person_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+                        <option value="">All Categories</option>
+                        <option value="Client" {% if filters.person_type == 'Client' %}selected{% endif %}>Client</option>
+                        <option value="Colleague" {% if filters.person_type == 'Colleague' %}selected{% endif %}>Colleague</option>
+                        <option value="Supplier" {% if filters.person_type == 'Supplier' %}selected{% endif %}>Supplier</option>
+                        <option value="Partner" {% if filters.person_type == 'Partner' %}selected{% endif %}>Partner</option>
+                        <option value="Team Member" {% if filters.person_type == 'Team Member' %}selected{% endif %}>Team Member</option>
+                        <option value="Manager" {% if filters.person_type == 'Manager' %}selected{% endif %}>Manager</option>
+                        <option value="Customer" {% if filters.person_type == 'Customer' %}selected{% endif %}>Customer</option>
+                        <option value="Vendor" {% if filters.person_type == 'Vendor' %}selected{% endif %}>Vendor</option>
+                        <option value="Other" {% if filters.person_type == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Communication Type</label>
+                    <select name="interaction_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+                        <option value="">All Types</option>
+                        <option value="Phone Call" {% if filters.interaction_type == 'Phone Call' %}selected{% endif %}>Phone Call</option>
+                        <option value="Email" {% if filters.interaction_type == 'Email' %}selected{% endif %}>Email</option>
+                        <option value="Video Meeting" {% if filters.interaction_type == 'Video Meeting' %}selected{% endif %}>Video Meeting</option>
+                        <option value="In-Person Meeting" {% if filters.interaction_type == 'In-Person Meeting' %}selected{% endif %}>In-Person Meeting</option>
+                        <option value="Text Message" {% if filters.interaction_type == 'Text Message' %}selected{% endif %}>Text Message</option>
+                        <option value="Instant Message" {% if filters.interaction_type == 'Instant Message' %}selected{% endif %}>Instant Message</option>
+                        <option value="Social Media" {% if filters.interaction_type == 'Social Media' %}selected{% endif %}>Social Media</option>
+                        <option value="Other" {% if filters.interaction_type == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Person Type</label>
-                <select name="person_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-                    <option value="">All</option>
-                    <option value="Employer" {% if filters.person_type == 'Employer' %}selected{% endif %}>Employer</option>
-                    <option value="Student" {% if filters.person_type == 'Student' %}selected{% endif %}>Student</option>
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Interaction Type</label>
-                <select name="interaction_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-                    <option value="">All</option>
-                    <option value="Phone Call" {% if filters.interaction_type == 'Phone Call' %}selected{% endif %}>Phone Call</option>
-                    <option value="Email" {% if filters.interaction_type == 'Email' %}selected{% endif %}>Email</option>
-                    <option value="In-Person" {% if filters.interaction_type == 'In-Person' %}selected{% endif %}>In-Person</option>
-                    <option value="Meeting" {% if filters.interaction_type == 'Meeting' %}selected{% endif %}>Meeting</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- Second Row - 4 filters -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px;">
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Issue Type</label>
-                <select name="issue_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-                    <option value="">All</option>
-                    <option value="Just Checking">Just Checking</option>
-                    <option value="Problem">Problem</option>
-                    <option value="Complaint">Complaint</option>
-                    <option value="Request">Request</option>
-                    <option value="Feedback">Feedback</option>
-                    <option value="Inquiry">Inquiry</option>
-                    <option value="Technical Issue">Technical Issue</option>
-                    <option value="Billing/Payment">Billing/Payment</option>
-                    <option value="Follow-Up">Follow-Up</option>
-                    <option value="Urgent">Urgent</option>
-                    <option value="Other">Other</option>
-                </select>
+            <!-- Second Row - 3 filters -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Purpose</label>
+                    <select name="issue_type" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+                        <option value="">All Purposes</option>
+                        <option value="Follow-up" {% if filters.issue_type == 'Follow-up' %}selected{% endif %}>Follow-up</option>
+                        <option value="Project Update" {% if filters.issue_type == 'Project Update' %}selected{% endif %}>Project Update</option>
+                        <option value="Question" {% if filters.issue_type == 'Question' %}selected{% endif %}>Question</option>
+                        <option value="Problem Resolution" {% if filters.issue_type == 'Problem Resolution' %}selected{% endif %}>Problem Resolution</option>
+                        <option value="Planning" {% if filters.issue_type == 'Planning' %}selected{% endif %}>Planning</option>
+                        <option value="Feedback" {% if filters.issue_type == 'Feedback' %}selected{% endif %}>Feedback</option>
+                        <option value="Introduction" {% if filters.issue_type == 'Introduction' %}selected{% endif %}>Introduction</option>
+                        <option value="Networking" {% if filters.issue_type == 'Networking' %}selected{% endif %}>Networking</option>
+                        <option value="Sales" {% if filters.issue_type == 'Sales' %}selected{% endif %}>Sales</option>
+                        <option value="Support" {% if filters.issue_type == 'Support' %}selected{% endif %}>Support</option>
+                        <option value="Other" {% if filters.issue_type == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">From Date</label>
+                    <input type="date" name="date_from" value="{{ filters.date_from }}"
+                           style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">To Date</label>
+                    <input type="date" name="date_to" value="{{ filters.date_to }}"
+                           style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
+                </div>
             </div>
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">From Date</label>
-                <input type="date" name="date_from" value="{{ filters.date_from }}"
-                       style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">To Date</label>
-                <input type="date" name="date_to" value="{{ filters.date_to }}"
-                       style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 10px; color: #f2f2f2;">Created By</label>
-                <select name="created_by" style="width: 100%; padding: 10px; background-color: #333; color: #f2f2f2; border: 1px solid #444; border-radius: 5px;">
-                    <option value="">All Users</option>
-                    {% for user in all_users %}
-                        <option value="{{ user.username }}" {% if filters.created_by == user.username %}selected{% endif %}>{{ user.username }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
 
-        <!-- Action buttons -->
-        <div style="display: flex; justify-content: space-between;">
-            <button type="submit" style="padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Apply Filters</button>
-            <a href="/" style="padding: 10px 20px; background-color: #666; color: white; border-radius: 5px; text-decoration: none;">Reset</a>
-            <a href="{{ url_for('export', **request.args) }}"
-               style="padding: 10px 20px; background-color: #27ae60; color: white; border-radius: 5px; text-decoration: none;">Export to Excel</a>
-        </div>
-    </form>
-</div>
+            <!-- Action buttons -->
+            <div style="display: flex; justify-content: space-between;">
+                <button type="submit" style="padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Apply Filters</button>
+                <a href="/" style="padding: 10px 20px; background-color: #666; color: white; border-radius: 5px; text-decoration: none;">Reset</a>
+                <a href="{{ url_for('export', **request.args) }}"
+                   style="padding: 10px 20px; background-color: #27ae60; color: white; border-radius: 5px; text-decoration: none;">Export to Excel</a>
+            </div>
+        </form>
+    </div>
 
     <!-- Logs Table -->
     <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
         <tr>
             <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">ID</th>
-            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Person Type</th>
+            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Category</th>
             <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Name</th>
             <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Date</th>
-            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Interaction Type</th>
-            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Issue Type</th>
+            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Communication Type</th>
+            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Purpose</th>
             <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Notes</th>
-            <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Created By</th>
             <th style="padding: 15px; text-align: left; background-color: #444; color: white; border: 1px solid #555;">Actions</th>
         </tr>
         {% for log in logs %}
         <tr style="background-color: #333; border: 1px solid #444;">
             <td style="padding: 15px; border: 1px solid #444;">{{ log['id'] }}</td>
             <td style="padding: 15px; border: 1px solid #444;">{{ log['person_type'] }}</td>
-            <td style="padding: 15px; border: 1px solid #444;">
-                <a href="{{ url_for('student_communications', student_name=log['name']) }}" style="color: #3498db; text-decoration: none;">
-                    {{ log['name'] }}
-                </a>
-            </td>
+            <td style="padding: 15px; border: 1px solid #444;">{{ log['name'] }}</td>
             <td style="padding: 15px; border: 1px solid #444;">{{ log['date'] }}</td>
             <td style="padding: 15px; border: 1px solid #444;">{{ log['interaction_type'] }}</td>
             <td style="padding: 15px; border: 1px solid #444;">{{ log['issue_type'] }}</td>
             <td style="padding: 15px; border: 1px solid #444; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ log['notes'] }}</td>
-            <td style="padding: 15px; border: 1px solid #444;">{{ log['username'] }}</td>
             <td style="padding: 15px; border: 1px solid #444;">
-                {% if log['user_id_int'] == current_user.get_id()|int %}
-                    <a href="/edit/{{ log['id'] }}" style="color: #3498db; text-decoration: none;">Edit</a> |
-                    <a href="/delete/{{ log['id'] }}" onclick="return confirm('Are you sure?')" style="color: #e74c3c; text-decoration: none;">Delete</a>
-                {% else %}
-                    <span style="color: #7f8c8d;">View Only</span>
-                {% endif %}
+                <a href="/edit/{{ log['id'] }}" style="color: #3498db; text-decoration: none;">Edit</a> |
+                <a href="/delete/{{ log['id'] }}" onclick="return confirm('Are you sure?')" style="color: #e74c3c; text-decoration: none;">Delete</a>
             </td>
         </tr>
         {% endfor %}

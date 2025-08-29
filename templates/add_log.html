@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container">
-    <h1 class="text-3xl neon mb-6">Add New Log</h1>
-    
+    <h1 class="text-3xl neon mb-6">Add New Communication Log</h1>
+
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="mb-4 p-3 bg-red-500 text-white rounded">
@@ -10,64 +10,119 @@
             </div>
         {% endif %}
     {% endwith %}
-    
-    <form method="POST" action="/add">
-        <div class="mb-4">
-            <label for="person_type" class="block mb-2">Person Type:</label>
-            <select id="person_type" name="person_type" class="w-full p-2 rounded bg-gray-700" required>
-                <option value="Employer">Employer</option>
-                <option value="Student">Student</option>
-            </select>
+
+    <form method="POST" action="/add" class="glass p-6 rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-4">
+                <div>
+                    <label for="person_type" class="block mb-2 text-lg">Category *</label>
+                    <select id="person_type" name="person_type" class="w-full p-3 rounded bg-gray-700" required>
+                        <option value="">Select a category</option>
+                        <option value="Client">Client</option>
+                        <option value="Colleague">Colleague</option>
+                        <option value="Supplier">Supplier</option>
+                        <option value="Partner">Partner</option>
+                        <option value="Team Member">Team Member</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Customer">Customer</option>
+                        <option value="Vendor">Vendor</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="name" class="block mb-2 text-lg">Contact Name *</label>
+                    <input type="text" id="name" name="name"
+                           class="w-full p-3 rounded bg-gray-700"
+                           placeholder="Enter contact name"
+                           pattern=".{2,50}"
+                           title="2-50 characters"
+                           required>
+                </div>
+
+                <div>
+                    <label for="interaction_type" class="block mb-2 text-lg">Communication Type *</label>
+                    <select id="interaction_type" name="interaction_type" class="w-full p-3 rounded bg-gray-700" required>
+                        <option value="">Select type</option>
+                        <option value="Phone Call">Phone Call</option>
+                        <option value="Email">Email</option>
+                        <option value="Video Meeting">Video Meeting</option>
+                        <option value="In-Person Meeting">In-Person Meeting</option>
+                        <option value="Text Message">Text Message</option>
+                        <option value="Instant Message">Instant Message</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-4">
+                <div>
+                    <label for="issue_type" class="block mb-2 text-lg">Purpose *</label>
+                    <select id="issue_type" name="issue_type" class="w-full p-3 rounded bg-gray-700" required>
+                        <option value="">Select purpose</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Project Update">Project Update</option>
+                        <option value="Question">Question</option>
+                        <option value="Problem Resolution">Problem Resolution</option>
+                        <option value="Planning">Planning</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Introduction">Introduction</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Support">Support</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="date" class="block mb-2 text-lg">Date & Time</label>
+                    <input type="datetime-local" id="date" name="date"
+                           class="w-full p-3 rounded bg-gray-700"
+                           value="{{ now }}">
+                </div>
+            </div>
         </div>
-        
-        <div class="mb-4">
-            <label for="name" class="block mb-2">Name:</label>
-            <input type="text" id="name" name="name" 
-                   class="w-full p-2 rounded bg-gray-700"
-                   pattern="[A-Za-z\s]{2,50}"
-                   title="2-50 alphabetic characters"
-                   required>
-        </div>
-        
-        <div class="mb-4">
-            <label for="interaction_type" class="block mb-2">Interaction Type:</label>
-            <select id="interaction_type" name="interaction_type" class="w-full p-2 rounded bg-gray-700" required>
-                <option value="Phone Call">Phone Call</option>
-                <option value="Email">Email</option>
-                <option value="In-Person">In-Person</option>
-                <option value="Meeting">Meeting</option>
-            </select>
-        </div>
-        
-        <div class="mb-4">
-            <label for="issue_type" class="block mb-2">Issue Type:</label>
-            <select id="issue_type" name="issue_type" class="w-full p-2 rounded bg-gray-700" required>
-                <option value="Just Checking">Just Checking</option>
-                <option value="Problem">Problem</option>
-                <option value="Complaint">Complaint</option>
-                <option value="Request">Request</option>
-                <option value="Feedback">Feedback</option>
-                <option value="Inquiry">Inquiry</option>
-                <option value="Technical Issue">Technical Issue</option>
-                <option value="Billing/Payment">Billing/Payment</option>
-                <option value="Follow-Up">Follow-Up</option>
-                <option value="Urgent">Urgent</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-        
-        <div class="mb-4">
-            <label for="notes" class="block mb-2">Notes:</label>
-            <textarea id="notes" name="notes" 
-                      class="w-full p-2 rounded bg-gray-700"
+
+        <div class="mt-6">
+            <label for="notes" class="block mb-2 text-lg">Notes *</label>
+            <textarea id="notes" name="notes"
+                      class="w-full p-3 rounded bg-gray-700"
+                      rows="5"
+                      placeholder="Enter details about the communication..."
                       maxlength="500"
                       required></textarea>
-            <p class="text-sm text-gray-400">Max 500 characters</p>
+            <div class="flex justify-between mt-2">
+                <p class="text-sm text-gray-400">Max 500 characters</p>
+                <p class="text-sm text-gray-400"><span id="char-count">500</span> characters remaining</p>
+            </div>
         </div>
-        
-        <button type="submit" class="btn-glow w-full py-2">Add Log</button>
+
+        <div class="mt-8 flex gap-4">
+            <button type="submit" class="btn-glow px-8 py-3 text-lg">Add Log</button>
+            <a href="/" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">Cancel</a>
+        </div>
     </form>
-    
-    <a href="/" class="block text-center mt-6 text-blue-400 hover:underline">Back to Logs</a>
 </div>
+
+<script>
+    // Character counter for notes
+    document.addEventListener('DOMContentLoaded', function() {
+        const notes = document.getElementById('notes');
+        const charCount = document.getElementById('char-count');
+
+        notes.addEventListener('input', function() {
+            const remaining = 500 - this.value.length;
+            charCount.textContent = remaining;
+            charCount.style.color = remaining < 50 ? '#e74c3c' : '#7f8c8d';
+        });
+
+        // Set current datetime as default
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('date').value = now.toISOString().slice(0, 16);
+    });
+</script>
 {% endblock %}

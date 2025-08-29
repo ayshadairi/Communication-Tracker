@@ -62,23 +62,11 @@ class User(UserMixin):
     def get_id(self):
         return str(self.id)
 
-    def is_verified(self):
-        conn = get_db_connection()
-        user = conn.execute('SELECT email_verified FROM users WHERE id = ?', [self.id]).fetchone()
-        conn.close()
-        return user['email_verified'] if user else False
-
     def is_admin(self):
         conn = get_db_connection()
         user = conn.execute('SELECT is_admin FROM users WHERE id = ?', [self.id]).fetchone()
         conn.close()
         return user['is_admin'] if user else False
-
-    def is_approved(self):
-        conn = get_db_connection()
-        user = conn.execute('SELECT approved FROM users WHERE id = ?', [self.id]).fetchone()
-        conn.close()
-        return user['approved'] if user else False
 
 
 def get_db_connection():
@@ -97,11 +85,6 @@ def init_db():
             username TEXT UNIQUE NOT NULL CHECK(length(username) BETWEEN 3 AND 20),
             password TEXT NOT NULL CHECK(length(password) >= 8),
             email TEXT UNIQUE,
-            email_verified BOOLEAN DEFAULT FALSE,
-            verify_token TEXT,
-            reset_token TEXT,
-            token_expires DATETIME,
-            approved BOOLEAN DEFAULT FALSE,
             is_admin BOOLEAN DEFAULT FALSE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -110,16 +93,12 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            person_type TEXT NOT NULL CHECK(person_type IN ('Employer', 'Student')),
+            person_type TEXT NOT NULL,
             name TEXT NOT NULL CHECK(length(name) BETWEEN 2 AND 50),
             date TEXT NOT NULL,
-            interaction_type TEXT NOT NULL CHECK(interaction_type IN (
-                'Phone Call', 'Email', 'In-Person', 'Meeting')),
+            interaction_type TEXT NOT NULL,
             notes TEXT NOT NULL CHECK(length(notes) <= 500),
-            issue_type TEXT NOT NULL CHECK(issue_type IN (
-                'Just Checking', 'Problem', 'Complaint', 'Request',
-                'Feedback', 'Inquiry', 'Technical Issue',
-                'Billing/Payment', 'Follow-Up', 'Urgent', 'Other')),
+            issue_type TEXT NOT NULL,
             user_id INTEGER NOT NULL,
             created_by TEXT NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id)
@@ -148,8 +127,8 @@ def create_admin():
         password = input("Enter admin password: ")
 
         conn.execute(
-            "INSERT INTO users (username, password, email, approved, is_admin) VALUES (?, ?, ?, ?, ?)",
-            (username, generate_password_hash(password), email, True, True)
+            "INSERT INTO users (username, password, email, is_admin) VALUES (?, ?, ?, ?)",
+            (username, generate_password_hash(password), email, True)
         )
         conn.commit()
         click.echo(f'Admin user {username} created successfully!')
@@ -161,101 +140,6 @@ def create_admin():
 
 app.cli.add_command(init_db_command)
 app.cli.add_command(create_admin)
-
-
-def send_verification_email(user_email, token):
-    verify_link = url_for('verify_email', token=token, _external=True)
-    msg = Message('Verify Your Email', recipients=[user_email])
-    msg.body = f'''Please click the following link to verify your email:
-{verify_link}
-
-If you didn't create an account, please ignore this email.'''
-    mail.send(msg)
-
-
-def send_admin_notification(username, email):
-    admin_email = "admin@example.com"  # Change to your admin email
-    approve_link = url_for('admin_users', _external=True)
-    msg = Message('New User Approval Request', recipients=[admin_email])
-    msg.body = f'''New user registration requires approval:
-Username: {username}
-Email: {email}
-
-Approve this user: {approve_link}'''
-    mail.send(msg)
-
-
-def generate_reset_token():
-    alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(32))
-
-
-@app.route('/admin/users')
-@login_required
-def admin_users():
-    if not current_user.is_admin():
-        abort(403)
-
-    conn = get_db_connection()
-    users = conn.execute('''
-        SELECT id, username, email, approved, is_admin, created_at 
-        FROM users 
-        ORDER BY approved ASC, created_at DESC
-    ''').fetchall()
-    conn.close()
-    return render_template('admin_users.html', users=users)
-@app.route('/admin')
-@login_required
-def admin_dashboard():
-    if not current_user.is_admin:
-        abort(403)
-    return render_template('admin_dashboard.html')
-
-@app.route('/admin/approve/<int:user_id>')
-@login_required
-def approve_user(user_id):
-    if not current_user.is_admin():
-        abort(403)
-
-    conn = get_db_connection()
-    try:
-        conn.execute('UPDATE users SET approved = TRUE WHERE id = ?', [user_id])
-
-        user = conn.execute('SELECT email FROM users WHERE id = ?', [user_id]).fetchone()
-        if user:
-            msg = Message('Account Approved', recipients=[user['email']])
-            msg.body = 'Your account has been approved. You can now log in.'
-            mail.send(msg)
-
-        conn.commit()
-        flash('User approved successfully', 'success')
-    except Exception as e:
-        conn.rollback()
-        flash(f'Error approving user: {str(e)}', 'error')
-    finally:
-        conn.close()
-
-    return redirect(url_for('admin_users'))
-
-
-@app.route('/admin/make-admin/<int:user_id>')
-@login_required
-def make_admin(user_id):
-    if not current_user.is_admin():
-        abort(403)
-
-    conn = get_db_connection()
-    try:
-        conn.execute('UPDATE users SET is_admin = TRUE WHERE id = ?', [user_id])
-        conn.commit()
-        flash('User granted admin privileges', 'success')
-    except Exception as e:
-        conn.rollback()
-        flash(f'Error updating user: {str(e)}', 'error')
-    finally:
-        conn.close()
-
-    return redirect(url_for('admin_users'))
 
 
 @login_manager.user_loader
@@ -271,7 +155,7 @@ def register():
         password = request.form.get('password', '').strip()
         confirm_password = request.form.get('confirm_password', '').strip()
 
-        if not EMAIL_REGEX.match(email):
+        if email and not EMAIL_REGEX.match(email):
             flash('Please enter a valid email address', 'error')
             return redirect(url_for('register'))
 
@@ -298,19 +182,13 @@ def register():
         conn = get_db_connection()
         try:
             hashed_password = generate_password_hash(password)
-            verify_token = generate_reset_token()
             conn.execute(
-                "INSERT INTO users (username, password, email, verify_token) VALUES (?, ?, ?, ?)",
-                (username, hashed_password, email, verify_token)
+                "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+                (username, hashed_password, email)
             )
             conn.commit()
 
-            send_verification_email(email, verify_token)
-            send_admin_notification(username, email)
-
-            flash(
-                'Registration successful! Please check your email for verification. Your account will be active after admin approval.',
-                'success')
+            flash('Registration successful! You can now log in.', 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError as e:
             flash('Username or email already exists', 'error')
@@ -319,25 +197,6 @@ def register():
             conn.close()
 
     return render_template('register.html')
-
-
-@app.route('/verify/<token>')
-def verify_email(token):
-    conn = get_db_connection()
-    try:
-        user = conn.execute('SELECT * FROM users WHERE verify_token = ?', [token]).fetchone()
-        if user:
-            conn.execute('UPDATE users SET email_verified = TRUE, verify_token = NULL WHERE id = ?', [user['id']])
-            conn.commit()
-            flash('Email verified successfully! Waiting for admin approval.', 'success')
-        else:
-            flash('Invalid or expired verification link', 'error')
-    except Exception as e:
-        conn.rollback()
-        flash('Error verifying email', 'error')
-    finally:
-        conn.close()
-    return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -352,14 +211,6 @@ def login():
         conn.close()
 
         if user and check_password_hash(user['password'], password):
-            if not user['email_verified']:
-                flash('Please verify your email before logging in', 'error')
-                return redirect(url_for('login'))
-
-            if not user['approved']:
-                flash('Your account is pending admin approval', 'error')
-                return redirect(url_for('login'))
-
             user_obj = User(str(user['id']))
             login_user(user_obj)
             session['user_id'] = user['id']
@@ -381,9 +232,14 @@ def logout():
 @login_required
 def profile():
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE id = ?', [current_user.id]).fetchone()
+    user = conn.execute('SELECT id, username, email, created_at FROM users WHERE id = ?', [current_user.id]).fetchone()
     conn.close()
-    return render_template('profile.html', user=user)
+
+    if user:
+        return render_template('profile.html', user=user)
+    else:
+        flash('User not found', 'error')
+        return redirect(url_for('index'))
 
 
 @app.route('/change_username', methods=['GET', 'POST'])
@@ -543,63 +399,40 @@ def index():
         'issue_type': request.args.get('issue_type', ''),
         'date_from': request.args.get('date_from', ''),
         'date_to': request.args.get('date_to', ''),
-        'created_by': request.args.get('created_by', '')
     }
-    all_users = conn.execute('SELECT username FROM users').fetchall()
+
+    # Start with user-specific query
     query = '''
         SELECT logs.*, users.username, CAST(logs.user_id AS INTEGER) as user_id_int 
         FROM logs JOIN users ON logs.user_id = users.id
+        WHERE logs.user_id = ?
     '''
-    params = []
+    params = [current_user.id]
 
     if filters['name']:
-        query += " WHERE logs.name LIKE ?"
+        query += " AND logs.name LIKE ?"
         params.append(f"%{filters['name']}%")
     if filters['person_type']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.person_type = ?"
+        query += " AND logs.person_type = ?"
         params.append(filters['person_type'])
     if filters['interaction_type']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.interaction_type = ?"
+        query += " AND logs.interaction_type = ?"
         params.append(filters['interaction_type'])
     if filters['issue_type']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.issue_type = ?"
+        query += " AND logs.issue_type = ?"
         params.append(filters['issue_type'])
     if filters['date_from']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.date >= ?"
+        query += " AND logs.date >= ?"
         params.append(filters['date_from'])
     if filters['date_to']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.date <= ?"
+        query += " AND logs.date <= ?"
         params.append(filters['date_to'])
-    if filters['created_by']:
-        query += " WHERE " if not params else " AND "
-        query += "logs.created_by = ?"
-        params.append(filters['created_by'])
 
     query += " ORDER BY logs.date DESC"
     logs = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('index.html', logs=logs, filters=filters, all_users=all_users)
-
-
-@app.route('/student/<student_name>')
-@login_required
-def student_communications(student_name):
-    conn = get_db_connection()
-    logs = conn.execute('''
-        SELECT logs.*, users.username, CAST(logs.user_id AS INTEGER) as user_id_int
-        FROM logs JOIN users ON logs.user_id = users.id 
-        WHERE logs.name = ?
-        ORDER BY logs.date DESC
-    ''', [student_name]).fetchall()
-    conn.close()
-
-    return render_template('student_comms.html', logs=logs, student_name=student_name)
+    return render_template('index.html', logs=logs, filters=filters)
 
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -612,7 +445,13 @@ def add_log():
             interaction_type = escape(request.form.get('interaction_type'))
             issue_type = escape(request.form.get('issue_type'))
             notes = escape(request.form.get('notes', '').strip())
-            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Get custom date or use current time
+            custom_date = request.form.get('date')
+            if custom_date:
+                date = custom_date.replace('T', ' ') + ':00'
+            else:
+                date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             if not 2 <= len(name) <= 50:
                 flash('Name must be 2-50 characters')
@@ -641,7 +480,7 @@ def add_log():
             flash(f'Error creating log: {str(e)}', 'error')
             return redirect(url_for('add_log'))
 
-    return render_template('add_log.html')
+    return render_template('add_log.html', now=datetime.now().strftime('%Y-%m-%dT%H:%M'))
 
 
 @app.route('/edit/<int:log_id>', methods=['GET', 'POST'])
@@ -654,7 +493,8 @@ def edit_log(log_id):
         WHERE logs.id = ?
     ''', [log_id]).fetchone()
 
-    if not log or log['user_id'] != current_user.id:
+    # Fix the comparison - convert both to integers
+    if not log or int(log['user_id']) != int(current_user.id):
         conn.close()
         flash("You can only edit your own logs", 'error')
         return redirect(url_for('index'))
@@ -701,7 +541,8 @@ def delete_log(log_id):
     conn = get_db_connection()
     log = conn.execute("SELECT user_id FROM logs WHERE id = ?", [log_id]).fetchone()
 
-    if log and log['user_id'] == current_user.id:
+    # Fix the comparison - convert both to integers
+    if log and int(log['user_id']) == int(current_user.id):
         conn.execute("DELETE FROM logs WHERE id = ?", [log_id])
         conn.commit()
         flash('Log deleted successfully', 'success')
@@ -725,42 +566,33 @@ def export():
             'issue_type': request.args.get('issue_type', ''),
             'date_from': request.args.get('date_from', ''),
             'date_to': request.args.get('date_to', ''),
-            'created_by': request.args.get('created_by', '')
         }
 
         query = '''
             SELECT logs.*, users.username 
             FROM logs JOIN users ON logs.user_id = users.id
+            WHERE logs.user_id = ?
         '''
-        params = []
+        params = [current_user.id]
 
         if filters['name']:
-            query += " WHERE logs.name LIKE ?"
+            query += " AND logs.name LIKE ?"
             params.append(f"%{filters['name']}%")
         if filters['person_type']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.person_type = ?"
+            query += " AND logs.person_type = ?"
             params.append(filters['person_type'])
         if filters['interaction_type']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.interaction_type = ?"
+            query += " AND logs.interaction_type = ?"
             params.append(filters['interaction_type'])
         if filters['issue_type']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.issue_type = ?"
+            query += " AND logs.issue_type = ?"
             params.append(filters['issue_type'])
         if filters['date_from']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.date >= ?"
+            query += " AND logs.date >= ?"
             params.append(filters['date_from'])
         if filters['date_to']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.date <= ?"
+            query += " AND logs.date <= ?"
             params.append(filters['date_to'])
-        if filters['created_by']:
-            query += " WHERE " if not params else " AND "
-            query += "logs.created_by = ?"
-            params.append(filters['created_by'])
 
         query += " ORDER BY logs.date DESC"
         logs = conn.execute(query, params).fetchall()
@@ -789,30 +621,9 @@ def export():
         return redirect(url_for('index'))
 
 
-@app.route('/admin/delete/<int:user_id>')
-@login_required
-def delete_user(user_id):
-    if user_id == current_user.id:
-        flash('You cannot delete your own account', 'error')
-        return redirect(url_for('admin_users'))
-    if not current_user.is_admin():
-        abort(403)
-
-    conn = get_db_connection()
-    try:
-        # First delete any logs by this user
-        conn.execute('DELETE FROM logs WHERE user_id = ?', (user_id,))
-        # Then delete the user
-        conn.execute('DELETE FROM users WHERE id = ?', (user_id,))
-        conn.commit()
-        flash('User deleted successfully', 'success')
-    except Exception as e:
-        conn.rollback()
-        flash(f'Error deleting user: {str(e)}', 'error')
-    finally:
-        conn.close()
-
-    return redirect(url_for('admin_users'))
+def generate_reset_token():
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(32))
 
 
 with app.app_context():

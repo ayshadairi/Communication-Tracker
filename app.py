@@ -4,14 +4,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import escape
 from datetime import datetime, timedelta
 import sqlite3
-import pandas as pd
 from io import BytesIO
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from pathlib import Path
 import click
 from flask.cli import with_appcontext
-from openpyxl import Workbook
 import secrets
 import string
 from flask_mail import Mail, Message
@@ -596,25 +594,37 @@ def export():
 
         query += " ORDER BY logs.date DESC"
         logs = conn.execute(query, params).fetchall()
-        column_names = [description[0] for description in conn.execute(query, params).description]
         conn.close()
 
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Communication Logs"
+        # Create CSV instead of Excel
+        import csv
+        from io import StringIO
 
-        ws.append(column_names)
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(['ID', 'Category', 'Name', 'Date', 'Communication Type', 'Purpose', 'Notes', 'Created By'])
+
+        # Write data
         for log in logs:
-            ws.append([log[col] for col in column_names])
+            writer.writerow([
+                log['id'],
+                log['person_type'],
+                log['name'],
+                log['date'],
+                log['interaction_type'],
+                log['issue_type'],
+                log['notes'],
+                log['username']
+            ])
 
-        output = BytesIO()
-        wb.save(output)
         output.seek(0)
 
         return Response(
             output.getvalue(),
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment;filename=communication_logs.xlsx"}
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=communication_logs.csv"}
         )
     except Exception as e:
         flash(f"Error exporting data: {str(e)}", 'error')
